@@ -2,7 +2,6 @@ import { makeAutoObservable } from "mobx"
 import { ExpenseT, ModalT, PropT } from "../services/types"
 import React from "react";
 import _ from "lodash";
-import { AsyncTrunk } from "mobx-sync";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { isHydrated, makePersistable } from "mobx-persist-store";
 
@@ -78,7 +77,3 @@ export default class ExpensesStore implements PropT {
         this.modalData = state;
     };
 }
-
-export const trunk = new AsyncTrunk(ExpensesStore, {
-    storage: AsyncStorage,
-})
