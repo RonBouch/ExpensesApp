@@ -1,7 +1,7 @@
 import React from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Image, StyleSheet, Text, View } from 'react-native'
-import { EditPage, Home, Profile } from '../screens';
+import { Home, Profile } from '../screens';
 import { useExpensesStore } from '../store/ExpensesContext';
 import { Modal_Types } from '../services/Enums';
 
@@ -32,7 +32,7 @@ const TabsNavigator = () => {
                     tabPress: (e) => {
                         e.preventDefault()
 
-                        setModal(Modal_Types.Add)
+                        setModal({ type: Modal_Types.Add })
                     },
                 })}
             />

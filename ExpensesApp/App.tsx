@@ -5,20 +5,18 @@
  * @format
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   StatusBar,
   StyleSheet,
-  Text,
 } from 'react-native';
-
-// import { expensesStore } from './src/store/ExpensesStore';
-// import { observer } from 'mobx-react';
 import { ExpensesProvider } from './src/store/ExpensesContext';
 import RootNavigator from './src/routes/RootNavigator';
 
+
 function App(): JSX.Element {
+
   return (
     <React.Fragment>
       <SafeAreaView style={styles.safeTop} />

@@ -1,48 +1,53 @@
 import React, { Component } from "react";
-import { View, Text, StyleSheet, Pressable, Modal, TouchableOpacity, TextInput } from "react-native";
+import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput } from "react-native";
 import { observer } from "mobx-react";
 import { useExpensesStore } from "../../store/ExpensesContext";
 import { Modal_Types } from "../../services/Enums";
 import { Formik } from "formik";
 import * as Yup from 'yup';
-import { ExpenseT, InputT } from "../../services/types";
+import { ExpenseT } from "../../services/types";
+import _ from "lodash";
 
 
 const ModalComponent = observer(() => {
-    const { modalType, setModal, addExpense, updateExpense } = useExpensesStore();
+    const { modalData, setModal, addExpense, updateExpense, setFilterData, filterData } = useExpensesStore();
+    const isFilterModal = modalData.type == Modal_Types.Filter;
 
     const onSubmit = (e: ExpenseT) => {
         const { Add, Edit, Filter } = Modal_Types
-        console.log("🚀 ~ file: Modal.tsx:15 ~ onSubmit ~ e:", e)
-        switch (modalType) {
+        switch (modalData.type) {
             case Add:
                 addExpense(e)
+                setModal({ type: "" })
+                break;
             case Edit:
                 updateExpense(e)
+                setModal({ type: "" })
+                break;
+            case Filter:
+                setFilterData(e)
+                setModal({ type: "" })
+                break;
             default:
+                setModal({ type: "" })
                 break;
         }
-        // setModal("")
     }
 
     const validationSchemaLogin = Yup.object().shape({
-        title: Yup.string().required(),
-        amount: Yup.string().required(),
-        date: Yup.string().required()
+        title: modalData.type == Modal_Types.Filter ? Yup.string() : Yup.string().required(),
+        amount: modalData.type == Modal_Types.Filter ? Yup.string() : Yup.string().required(),
+        date: modalData.type == Modal_Types.Filter ? Yup.string() : Yup.string().required()
     });
 
 
     const RenderModal = () => {
-        const title = (modalType == Modal_Types.Add ? 'Create Expense' : modalType == Modal_Types.Edit ? "Edit Expense" : "Filters")
-        const btnTxt = modalType == Modal_Types.Add ? 'Create' : modalType == Modal_Types.Edit ? "Save" : "Filter"
+        const title = (modalData.type == Modal_Types.Add ? 'Create Expense' : modalData.type == Modal_Types.Edit ? "Edit Expense" : "Filters")
+        const btnTxt = modalData.type == Modal_Types.Add ? 'Create' : modalData.type == Modal_Types.Edit ? "Save" : "Filter"
+        const initialValues = filterData && Modal_Types.Filter == modalData.type ? filterData : Modal_Types.Edit == modalData.type && modalData.item ? modalData.item : { title: '', amount: '', date: '' }
         return (
-
             <Formik
-                initialValues={{
-                    title: '',
-                    amount: '',
-                    date: ''
-                }}
+                initialValues={initialValues}
                 onSubmit={onSubmit}
                 validationSchema={validationSchemaLogin}>
                 {({
@@ -54,54 +59,71 @@ const ModalComponent = observer(() => {
                     touched,
                     errors,
                     setFieldTouched,
-                    validateForm
-
+                    resetForm
                 }) => {
+                    return (
+                        <View
+                            style={[s.modalCon, isFilterModal && s.filterModalCon]}
+                        >
+                            <View style={s.headerCon}>
+                                {isFilterModal ? <TouchableOpacity style={s.cleanBtn} onPress={() => resetForm()}><Text style={s.clean}>clean</Text></TouchableOpacity> : <View />}
+                                <Text style={s.title}>{title}</Text>
+                                <TouchableOpacity style={s.closeIcon} onPress={() => setModal({ type: '' })}><Text>Close</Text></TouchableOpacity>
+                            </View>
 
-                    const CustomTextInput = ({ errorMsg, value, type, placeholder }: InputT) => {
-                        return (
                             <View style={s.totalCon}>
-                                {errorMsg && <Text style={s.errMsg}>{errorMsg}</Text>}
+                                {touched.title && errors.title && <Text style={s.errMsg}>{errors.title}</Text>}
                                 <TextInput
                                     style={s.txt}
-                                    placeholder={placeholder}
-                                    value={value}
-                                    onChangeText={handleChange(type)}
+                                    placeholder={'Enter Title'}
+                                    value={values.title}
+                                    onChangeText={handleChange('title')}
                                     onBlur={() => {
-                                        setFieldTouched(type, true)
-                                        handleBlur(type)
+                                        setFieldTouched('title', true)
+                                        handleBlur('title')
                                     }}
                                     keyboardType={'default'}
                                     onEndEditing={() => {
-                                        validateField(type);
+                                        validateField('title');
                                     }}
                                 />
-                            </View>)
-                    }
+                            </View>
 
-                    return (
-                        <View style={s.modalCon}>
-                            <Text style={s.title}>{title}</Text>
-                            <CustomTextInput
-                                errorMsg={errors.title}
-                                value={values.title}
-                                type={'title'}
-                                placeholder={"Enter Title"}
-                            />
-                            <CustomTextInput
-                                errorMsg={errors.amount}
-                                value={values.amount}
-                                type={'amount'}
-                                placeholder={"Enter Amount"}
-                            />
-                            <CustomTextInput
-                                errorMsg={errors.date}
-                                value={values.date}
-                                type={'date'}
-                                placeholder={"Enter Date"}
-                            />
+                            <View style={s.totalCon}>
+                                {touched.amount && errors.amount && <Text style={s.errMsg}>{errors.amount}</Text>}
+                                <TextInput
+                                    style={s.txt}
+                                    placeholder={'Enter Amount'}
+                                    value={values.amount}
+                                    onChangeText={handleChange('amount')}
+                                    onBlur={() => {
+                                        setFieldTouched('amount', true)
+                                        handleBlur('amount')
+                                    }}
+                                    keyboardType={'numeric'}
+                                    onEndEditing={() => {
+                                        validateField('amount');
+                                    }}
+                                />
+                            </View>
 
-
+                            <View style={s.totalCon}>
+                                {touched.date && errors.date && <Text style={s.errMsg}>{errors.date}</Text>}
+                                <TextInput
+                                    style={s.txt}
+                                    placeholder={'Enter Date'}
+                                    value={values.date}
+                                    onChangeText={handleChange('date')}
+                                    onBlur={() => {
+                                        setFieldTouched('date', true)
+                                        handleBlur('date')
+                                    }}
+                                    keyboardType={'default'}
+                                    onEndEditing={() => {
+                                        validateField('date');
+                                    }}
+                                />
+                            </View>
 
                             < TouchableOpacity style={s.btnLogin} onPress={(e: any) => handleSubmit(e)}>
                                 <Text style={s.btnLoginTxt}>{btnTxt}</Text>
@@ -110,37 +132,32 @@ const ModalComponent = observer(() => {
                     )
                 }
                 }
-
             </Formik >
-
-
-
         )
     }
-
 
 
     return (
         <Modal
             animationType="slide"
             transparent={true}
-            visible={!!modalType}
+            visible={!!modalData.type}
             onRequestClose={() => {
-                setModal('');
+                setModal({ type: '' });
             }}>
-            {modalType ? <RenderModal /> : <View />}
+
+            {modalData.type ? <RenderModal /> : <View />}
         </Modal>
 
 
     )
 })
 
-export default ModalComponent;
+export default React.memo(ModalComponent);
 const s = StyleSheet.create({
     title: {
-        marginTop: 30,
         fontSize: 20,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
     },
     modalCon: {
         backgroundColor: 'white',
@@ -153,48 +170,29 @@ const s = StyleSheet.create({
         alignItems: 'center',
         padding: 20
     },
-    centeredView: {
-        flex: 1,
+    filterModalCon: {
+        height: '60%',
+    },
+    headerCon: {
+        flexDirection: 'row',
+        marginTop: 20,
         width: '100%',
-        height: 800,
-        // justifyContent: 'center',
-        // alignItems: 'center',
-        marginTop: 22,
-    },
-    modalView: {
-        margin: 20,
-        backgroundColor: 'white',
-        borderRadius: 20,
-        padding: 35,
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
+        justifyContent: 'center'
     },
-    button: {
-        borderRadius: 20,
-        padding: 10,
-        elevation: 2,
+    cleanBtn: {
+        position: 'absolute',
+        top: 6,
+        left: 20,
     },
-    buttonOpen: {
-        backgroundColor: '#F194FF',
+    clean: {
+        color: '#455EFF',
+        fontSize: 14
     },
-    buttonClose: {
-        backgroundColor: '#2196F3',
-    },
-    textStyle: {
-        color: 'white',
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
-    modalText: {
-        marginBottom: 15,
-        textAlign: 'center',
+    closeIcon: {
+        position: 'absolute',
+        top: 6,
+        right: 20,
     },
     totalCon: {
         width: '100%',

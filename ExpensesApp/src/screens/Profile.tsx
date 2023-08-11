@@ -1,24 +1,25 @@
+import React from 'react'
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { useExpensesStore } from '../store/ExpensesContext';
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react'
-import { StyleSheet, ScrollView, FlatList, View, Text, TouchableOpacity, TextInput } from 'react-native';
 
 const Profile = () => {
+    const { expensesData, logout } = useExpensesStore();
     const navigation = useNavigation()
-    const [name, setName] = useState('');
-
-    useEffect(() => {
-    }, [])
 
 
     return (
         <View style={styles.container}>
             <View style={styles.totalCon}>
                 <Text style={styles.txt}  >TotalExpense Items:</Text>
-                <Text style={styles.txt}  >3</Text>
+                <Text style={styles.txt}  >{expensesData.length}</Text>
             </View>
-            <View style={styles.totalCon}>
+            <TouchableOpacity onPress={() => {
+                logout()
+                navigation.navigate("Login")
+            }} style={styles.totalCon}>
                 <Text style={styles.txt}  >Sign out</Text>
-            </View>
+            </TouchableOpacity>
         </View>
     )
 }

@@ -1,7 +1,5 @@
 import React, { useContext, useRef } from "react";
 import ExpensesStore from "./ExpensesStore";
-
-// 
 const ExpensesContext = React.createContext<ExpensesStore>(
     null as unknown as ExpensesStore
 );
@@ -21,3 +19,4 @@ export function ExpensesProvider({ children }: Props) {
         </ExpensesContext.Provider>
     );
 }
+

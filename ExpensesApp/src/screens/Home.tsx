@@ -1,29 +1,12 @@
 import { observer } from 'mobx-react';
-import React, { useContext, useEffect, useState } from 'react'
-import { StyleSheet, ScrollView, FlatList, View, Text, TouchableOpacity } from 'react-native';
-// import { ExpensesContext } from '../store/ExpensesContext';
+import React from 'react'
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { useExpensesStore } from "../store/ExpensesContext";
-import { useNavigation } from '@react-navigation/native';
 import _ from 'lodash';
 import { Modal_Types } from '../services/Enums';
 
 const Home = observer(() => {
-    const { name, setName, setModal } = useExpensesStore();
-    const navigation = useNavigation()
-    const [expenseData, setExpenseData] = useState<any>({})
-    const data = [
-        { date: "28.07.2022", name: 'Some expense', sum: 230 },
-        { date: "28.07.2022", name: 'Some expense2', sum: 600 },
-        { date: "27.07.2022", name: 'Some expense', sum: 210 }
-    ]
-
-    useEffect(() => {
-        if (data) {
-            let newData = _.groupBy(data.slice(), 'date')
-            console.log("🚀 ~ file: Home.tsx:22 ~ useEffect ~ newData:", newData)
-            setExpenseData(newData)
-        }
-    }, [])
+    const { setModal, getDataAfterFilter } = useExpensesStore();
 
 
     return (
@@ -32,28 +15,33 @@ const Home = observer(() => {
                 <Text style={styles.title}>Total Expenses:</Text>
                 <Text style={styles.sumExpenses}>$1,024.00</Text>
             </View>
-            <TouchableOpacity style={styles.filterBtn} onPress={() => setModal(Modal_Types.Filter)}>
+            <TouchableOpacity style={styles.filterBtn} onPress={() => setModal({ type: Modal_Types.Filter })}>
                 <Text style={styles.filterTxt}>Filters</Text>
             </TouchableOpacity>
 
-            {!_.isEmpty(expenseData) && Object.keys(expenseData).map((key: string) => {
-                return (
-                    <View key={key} style={styles.itemsCon}>
-                        <View style={styles.dateCon}>
-                            <Text style={styles.dateTxt}>{expenseData[key][0].date}</Text>
-                        </View>
-                        {expenseData[key].map((e: any, i: number) => {
-                            return (
-                                <TouchableOpacity onPress={() => setModal(Modal_Types.Edit)} key={e.name + i + key} style={[styles.itemCon, i < expenseData[key].length - 1 && styles.borderBottom]} >
-                                    <Text style={styles.itemTxt}>{e.name}</Text>
-                                    <Text style={styles.itemTxt}>${e.sum}</Text>
-                                </TouchableOpacity >
-                            )
-                        })}
+            {!_.isEmpty(getDataAfterFilter) ?
+                Object.keys(getDataAfterFilter).map((key: string) => {
+                    return (
+                        <View key={key} style={styles.itemsCon}>
+                            <View style={styles.dateCon}>
+                                <Text style={styles.dateTxt}>{getDataAfterFilter[key][0].date}</Text>
+                            </View>
+                            {getDataAfterFilter[key].map((e: any, i: number) => {
+                                return (
+                                    <TouchableOpacity onPress={() => setModal({ type: Modal_Types.Edit, item: e })} key={e.name + i + key} style={[styles.itemCon, i < getDataAfterFilter[key].length - 1 && styles.borderBottom]} >
+                                        <Text style={styles.itemTxt}>{e.title}</Text>
+                                        <Text style={styles.itemTxt}>${e.amount}</Text>
+                                    </TouchableOpacity >
+                                )
+                            })}
 
-                    </View>
-                )
-            })}
+                        </View>
+                    )
+                })
+                :
+                <Text style={styles.noRes}>No Results</Text>
+
+            }
         </View>
     )
 })

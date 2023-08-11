@@ -1,9 +1,10 @@
 
 export interface PropT {
     name: string;
-    isUserLogin: boolean;
-    modalType: string;
+    modalData: ModalT;
     expensesData: ExpenseT[];
+    filterData: ExpenseT | null;
+    dataAfterFilter: { [name: string]: ExpenseT[] } | {};
 }
 
 export interface InputT {
@@ -11,6 +12,7 @@ export interface InputT {
     type: string;
     value: string;
     placeholder: string
+    touched: boolean;
 }
 
 export interface ExpenseT {
@@ -18,4 +20,8 @@ export interface ExpenseT {
     amount: string;
     id?: number;
     date: string;
+}
+export interface ModalT {
+    type: string;
+    item?: ExpenseT;
 }

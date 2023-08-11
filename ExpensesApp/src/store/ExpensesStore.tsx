@@ -1,31 +1,60 @@
-import { makeObservable, observable, computed, action, flow } from "mobx"
-import { ExpenseT, PropT } from "../services/types"
-import React, { useContext, useRef } from "react";
+import { makeAutoObservable } from "mobx"
+import { ExpenseT, ModalT, PropT } from "../services/types"
+import React from "react";
+import _ from "lodash";
+import { AsyncTrunk } from "mobx-sync";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { isHydrated, makePersistable } from "mobx-persist-store";
 
 export default class ExpensesStore implements PropT {
-    isUserLogin: boolean;
     name: string;
-    modalType: string;
+    modalData: ModalT;
     expensesData: ExpenseT[];
+    filterData: ExpenseT | null;
+    dataAfterFilter: { [name: string]: ExpenseT[] } | {};
 
     constructor() {
-        this.name = 'Ron';
-        this.isUserLogin = false;
-        this.modalType = '';
+        this.name = '';
+        this.modalData = { type: '' };
         this.expensesData = []
+        this.filterData = null;
+        this.dataAfterFilter = {}
 
-        makeObservable(this, {
-            name: observable,
-            isUserLogin: observable,
-            modalType: observable,
-            expensesData: observable,
-            setName: action,
-            setModal: action,
-            updateExpense: action,
-            addExpense: action
-        })
+        makeAutoObservable(this);
+
+        makePersistable(this, { name: 'ExpensesStore', properties: ['name', 'expensesData'], storage: AsyncStorage });
+
+    }
+    get isHydrated() {
+        return isHydrated(this);
     }
 
+    logout = () => {
+        this.name = '';
+        this.modalData = { type: '' };
+        this.expensesData = []
+        this.filterData = null;
+        this.dataAfterFilter = {}
+    }
+
+    get getDataAfterFilter() {
+        let originalData = this.expensesData.slice()
+        let newData: { [name: string]: ExpenseT[] } | ExpenseT[] = []
+        if (this.filterData) {
+            newData = originalData.slice().filter((f: ExpenseT) => this.filterData?.amount == f.amount || f.date == this.filterData?.date || this.filterData?.title == f.title)
+            newData = _.groupBy(newData.slice(), 'date')
+            return newData;
+        }
+        else {
+            newData = _.groupBy(originalData.slice(), 'date')
+            return newData
+        }
+    }
+
+    setFilterData = (state: ExpenseT) => {
+        if (!state.amount && !state.date && !state.title) this.filterData = null
+        else this.filterData = state;
+    }
 
     addExpense = (state: ExpenseT) => {
         let newData = {
@@ -36,17 +65,20 @@ export default class ExpensesStore implements PropT {
     }
 
     updateExpense = (state: ExpenseT) => {
-        console.log("🚀 ~ file: ExpensesStore.tsx:37 ~ ExpensesStore ~ state:", state)
         let index = this.expensesData?.findIndex(e => e.id == state.id)
-        
-        console.log("🚀 ~ file: ExpensesStore.tsx:36 ~ ExpensesStore ~ index:", index)
-        // this.expensesData[index || 0] = state
+        if (index >= 0)
+            this.expensesData[index] = state
     }
 
     setName = (state: string) => {
         this.name = state;
     };
-    setModal = (state: string) => {
-        this.modalType = state;
+
+    setModal = (state: ModalT) => {
+        this.modalData = state;
     };
 }
+
+export const trunk = new AsyncTrunk(ExpensesStore, {
+    storage: AsyncStorage,
+})
