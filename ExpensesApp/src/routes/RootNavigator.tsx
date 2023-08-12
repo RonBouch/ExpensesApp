@@ -16,7 +16,7 @@ const RootNavigator = observer(() => {
     return (
         <React.Fragment>
             <NavigationContainer >
-                <Stack.Navigator initialRouteName={'Login'} screenOptions={{ title: (name || 'Login') }}>
+                <Stack.Navigator initialRouteName={'Login'} screenOptions={{ title: (name || 'Login'),  headerBackVisible: false }}>
                     <Stack.Screen name={'Home'} component={TabsNavigator} />
                     <Stack.Screen name={'Login'} component={Login} />
                     <Stack.Screen name={'Profile'} component={Profile} />
