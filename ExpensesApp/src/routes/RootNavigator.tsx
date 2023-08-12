@@ -2,11 +2,10 @@ import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Login, Profile } from '../screens';
-import TabsNavigator from './TavNavigator';
+import TabsNavigator from './TabsNavigator';
 import { observer } from 'mobx-react';
 import { useExpensesStore } from '../store/ExpensesContext';
 import Modal from '../components/Modal/Modal';
-
 
 const Stack = createNativeStackNavigator();
 

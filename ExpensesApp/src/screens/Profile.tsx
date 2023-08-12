@@ -1,11 +1,12 @@
 import React from 'react'
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { useExpensesStore } from '../store/ExpensesContext';
-import { useNavigation } from '@react-navigation/native';
+import { ParamListBase, useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 const Profile = () => {
     const { expensesData, logout } = useExpensesStore();
-    const navigation = useNavigation()
+    const navigation = useNavigation<StackNavigationProp<ParamListBase>>()
 
 
     return (

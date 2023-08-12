@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput } from "react-native";
+import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, Image } from "react-native";
 import { observer } from "mobx-react";
 import { useExpensesStore } from "../../store/ExpensesContext";
 import { Modal_Types } from "../../services/Enums";
@@ -59,16 +59,20 @@ const ModalComponent = observer(() => {
                     touched,
                     errors,
                     setFieldTouched,
-                    resetForm
+                    setValues
                 }) => {
                     return (
                         <View
                             style={[s.modalCon, isFilterModal && s.filterModalCon]}
                         >
                             <View style={s.headerCon}>
-                                {isFilterModal ? <TouchableOpacity style={s.cleanBtn} onPress={() => resetForm()}><Text style={s.clean}>clean</Text></TouchableOpacity> : <View />}
+                                {isFilterModal ? <TouchableOpacity style={s.cleanBtn} onPress={() => {
+                                    setValues({ ...values, title: '', amount: '', date: '' });
+                                }}><Text style={s.clean}>clean</Text></TouchableOpacity> : <View />}
                                 <Text style={s.title}>{title}</Text>
-                                <TouchableOpacity style={s.closeIcon} onPress={() => setModal({ type: '' })}><Text>Close</Text></TouchableOpacity>
+                                <TouchableOpacity style={s.closeIcon} onPress={() => setModal({ type: '' })}>
+                                    <Image style={s.closeIcon} source={require('../../assets/images/close.png')} />
+                                </TouchableOpacity>
                             </View>
 
                             <View style={s.totalCon}>
@@ -138,18 +142,19 @@ const ModalComponent = observer(() => {
 
 
     return (
-        <Modal
-            animationType="slide"
-            transparent={true}
-            visible={!!modalData.type}
-            onRequestClose={() => {
-                setModal({ type: '' });
-            }}>
+        <React.Fragment>
+            {!!modalData.type && <View style={s.bkg} />}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={!!modalData.type}
+                onRequestClose={() => {
+                    setModal({ type: '' });
+                }}>
 
-            {modalData.type ? <RenderModal /> : <View />}
-        </Modal>
-
-
+                {modalData.type ? <RenderModal /> : <View />}
+            </Modal>
+        </React.Fragment>
     )
 })
 
@@ -191,8 +196,10 @@ const s = StyleSheet.create({
     },
     closeIcon: {
         position: 'absolute',
-        top: 6,
-        right: 20,
+        top: 2,
+        right: 6,
+        width: 16,
+        height: 16
     },
     totalCon: {
         width: '100%',
@@ -223,5 +230,11 @@ const s = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         fontSize: 16
+    },
+    bkg: {
+        position: 'absolute',
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(112,112,112,0.7)'
     }
 })

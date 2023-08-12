@@ -23,7 +23,7 @@ const TabsNavigator = () => {
                 options={{ tabBarIcon: () => (<Image style={styles.img} source={require('../assets/images/home.png')} />) }} />
             <Tab.Screen
                 name='Edit Page'
-                component={EditPage}
+                component={Profile}
                 options={{
                     tabBarLabel: '',
                     tabBarIcon: () => (<Image style={styles.plusImg} source={require('../assets/images/plus.png')} />)

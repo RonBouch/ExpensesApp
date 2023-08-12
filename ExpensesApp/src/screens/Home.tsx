@@ -1,19 +1,22 @@
 import { observer } from 'mobx-react';
-import React from 'react'
+import React, { useCallback } from 'react'
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { useExpensesStore } from "../store/ExpensesContext";
 import _ from 'lodash';
 import { Modal_Types } from '../services/Enums';
 
 const Home = observer(() => {
-    const { setModal, getDataAfterFilter } = useExpensesStore();
+    const { setModal, getDataAfterFilter, expensesData } = useExpensesStore();
 
+    const getSum = useCallback(() =>
+        expensesData.reduce((_this, val) => +_this + +val.amount, 0)
+        , [expensesData])
 
     return (
         <View style={styles.container}>
             <View style={styles.titleCon}>
                 <Text style={styles.title}>Total Expenses:</Text>
-                <Text style={styles.sumExpenses}>$1,024.00</Text>
+                <Text style={styles.sumExpenses}>${getSum().toFixed(2)}</Text>
             </View>
             <TouchableOpacity style={styles.filterBtn} onPress={() => setModal({ type: Modal_Types.Filter })}>
                 <Text style={styles.filterTxt}>Filters</Text>
@@ -28,13 +31,12 @@ const Home = observer(() => {
                             </View>
                             {getDataAfterFilter[key].map((e: any, i: number) => {
                                 return (
-                                    <TouchableOpacity onPress={() => setModal({ type: Modal_Types.Edit, item: e })} key={e.name + i + key} style={[styles.itemCon, i < getDataAfterFilter[key].length - 1 && styles.borderBottom]} >
+                                    <TouchableOpacity onPress={() => setModal({ type: Modal_Types.Edit, item: e })} key={e.name + e.amount + i + key} style={[styles.itemCon, i < getDataAfterFilter[key].length - 1 && styles.borderBottom]} >
                                         <Text style={styles.itemTxt}>{e.title}</Text>
                                         <Text style={styles.itemTxt}>${e.amount}</Text>
                                     </TouchableOpacity >
                                 )
                             })}
-
                         </View>
                     )
                 })
@@ -121,4 +123,4 @@ const styles = StyleSheet.create({
 })
 
 
-export default Home;
+export default React.memo(Home);

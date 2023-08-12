@@ -1,14 +1,15 @@
-import { useNavigation } from '@react-navigation/native';
+import { ParamListBase, useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react'
 import { StyleSheet, View, Text, TouchableOpacity, TextInput } from 'react-native';
 import { useExpensesStore } from '../store/ExpensesContext';
 import { observer } from 'mobx-react';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 const Login = observer(() => {
-    const navigation = useNavigation()
+    const navigation = useNavigation<StackNavigationProp<ParamListBase>>()
     const { setName, name, isHydrated } = useExpensesStore();
     const [userName, setUserName] = useState('');
-    
+
     useEffect(() => {
         if (name)
             navigation.navigate('Home')
